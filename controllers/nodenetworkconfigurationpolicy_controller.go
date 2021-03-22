@@ -52,6 +52,7 @@ import (
 	"github.com/nmstate/kubernetes-nmstate/pkg/node"
 	"github.com/nmstate/kubernetes-nmstate/pkg/policyconditions"
 	"github.com/nmstate/kubernetes-nmstate/pkg/selectors"
+	nncp "github.com/nmstate/kubernetes-nmstate/pkg/webhook/nodenetworkconfigurationpolicy"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -254,7 +255,10 @@ func (r *NodeNetworkConfigurationPolicyReconciler) Reconcile(ctx context.Context
 		return ctrl.Result{}, err
 	}
 
-	policyconditions.Reset(r.Client, request.NamespacedName)
+	_, hasWebhookLabel := instance.ObjectMeta.Annotations[nncp.TimestampLabelKey]
+	if !hasWebhookLabel {
+		policyconditions.Reset(r.Client, request.NamespacedName)
+	}
 
 	err = r.initializeEnactment(*instance)
 	if err != nil {
