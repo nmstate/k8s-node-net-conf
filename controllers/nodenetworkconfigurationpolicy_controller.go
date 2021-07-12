@@ -190,8 +190,8 @@ func (r *NodeNetworkConfigurationPolicyReconciler) Reconcile(ctx context.Context
 	nmstateOutput, err := nmstate.ApplyDesiredState(r.APIClient, instance.Spec.DesiredState)
 	if err != nil {
 		errmsg := fmt.Errorf("error reconciling NodeNetworkConfigurationPolicy at desired state apply: %s, %v", nmstateOutput, err)
-
-		enactmentConditions.NotifyFailedToConfigure(errmsg)
+		strippedErrmsg := fmt.Errorf("error reconciling NodeNetworkConfigurationPolicy at desired state apply: %s,\n %s", nmstateOutput, formatErrorString(err))
+		enactmentConditions.NotifyFailedToConfigure(strippedErrmsg)
 		log.Error(errmsg, fmt.Sprintf("Rolling back network configuration, manual intervention needed: %s", nmstateOutput))
 		return ctrl.Result{}, nil
 	}
